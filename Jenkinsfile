@@ -24,7 +24,7 @@ pipeline {
             steps {
                 dir('frontend') {
                     bat 'npm ci'
-                    bat 'npm run build'
+                    bat 'set NODE_OPTIONS=--max-old-space-size=4096 && npm run build'
                 }
             }
         }
