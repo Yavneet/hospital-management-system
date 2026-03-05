@@ -69,3 +69,17 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  backend-deploy:
+    runs-on: ubuntu-latest
+    needs: backend
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Deploy to Heroku
+      uses: akhileshns/heroku-deploy@v3.12.14
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+        heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+        heroku_email: ${{ secrets.HEROKU_EMAIL }}
+        appdir: Backend
