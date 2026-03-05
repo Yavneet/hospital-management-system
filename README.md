@@ -14,7 +14,7 @@ A full-stack web application for managing hospital operations, including patient
 
 - **Frontend**: React, Bootstrap, Firebase Auth
 - **Backend**: Node.js, Express, MongoDB (Mongoose)
-- **Deployment**: Frontend on GitHub Pages, Backend on Heroku
+- **CI/CD**: GitHub Actions and Jenkins pipelines for automated building
 
 ## Setup
 
@@ -56,6 +56,15 @@ MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 FIREBASE_API_KEY=your_firebase_key
 ```
+
+## CI/CD
+
+This project includes automated CI/CD pipelines:
+
+- **GitHub Actions**: Runs on every push/PR to `master`, building backend and frontend.
+- **Jenkins**: Configurable pipeline for local/on-premise CI/CD.
+
+Both pipelines install dependencies and build the application without requiring credentials.
 
 ## Deployment
 

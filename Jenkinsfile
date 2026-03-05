@@ -1,6 +1,9 @@
 pipeline {
     agent any
 
+    // CI/CD pipeline for hospital management system
+    // Builds backend and frontend automatically
+
     stages {
         stage('Checkout') {
             steps { 
