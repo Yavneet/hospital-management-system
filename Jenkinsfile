@@ -61,7 +61,9 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+            node {
+                cleanWs()
+            }
         }
         success {
             emailext subject: "Build successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
