@@ -37,8 +37,3 @@ jobs:
     - name: Build
       run: npm run build
       working-directory: frontend
-      with:
-        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-        heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-        heroku_email: ${{ secrets.HEROKU_EMAIL }}
-        appdir: Backend
