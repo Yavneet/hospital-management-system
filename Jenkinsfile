@@ -3,6 +3,7 @@ pipeline {
 
     // CI/CD pipeline for hospital management system
     // Builds backend and frontend automatically
+    // Triggered on push to master
 
     stages {
         stage('Checkout') {
