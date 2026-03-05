@@ -4,6 +4,10 @@ pipeline {
     // CI/CD pipeline for hospital management system
     // Builds backend and frontend automatically
     // Triggered on push to master
+    
+    environment {
+        NODE_OPTIONS = '--max-old-space-size=4096'
+    }
 
     stages {
         stage('Checkout') {
@@ -24,7 +28,7 @@ pipeline {
             steps {
                 dir('frontend') {
                     bat 'npm ci'
-                    bat 'set NODE_OPTIONS=--max-old-space-size=4096 && npm run build'
+                    bat 'npm run build'
                 }
             }
         }
