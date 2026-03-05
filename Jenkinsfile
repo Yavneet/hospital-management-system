@@ -15,7 +15,7 @@ pipeline {
         stage('Backend: install') {
             steps {
                 dir('Backend') {
-                    sh 'npm ci'
+                    bat 'npm ci'
                 }
             }
         }
@@ -23,8 +23,8 @@ pipeline {
         stage('Frontend: install & build') {
             steps {
                 dir('frontend') {
-                    sh 'npm ci'
-                    sh 'npm run build'
+                    bat 'npm ci'
+                    bat 'npm run build'
                 }
             }
         }
