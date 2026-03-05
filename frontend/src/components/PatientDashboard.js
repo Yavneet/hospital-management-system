@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { apiFetch } from '../utils/api';
 
 export default function PatientDashboard() {
@@ -12,7 +12,7 @@ export default function PatientDashboard() {
 
   const patientName = localStorage.getItem('name') || 'Guest Patient';
 
-  async function loadAll() {
+  const loadAll = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -33,9 +33,9 @@ export default function PatientDashboard() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [patientName]);
 
-  useEffect(() => { loadAll(); }, []);
+  useEffect(() => { loadAll(); }, [loadAll]);
 
   async function createAppointment(e) {
   
