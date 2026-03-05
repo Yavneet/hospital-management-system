@@ -45,23 +45,3 @@ pipeline {
 
 
 
-
-//     post {
-//         always {
-//             node('any') {
-//                 cleanWs()
-//             }
-//         }
-//         success {
-//             emailext subject: "Build successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-//                     body: "See ${env.BUILD_URL}"
-//         }
-//         failure {
-//             emailext subject: "Build failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-//                     body: "See ${env.BUILD_URL}"
-//         }
-//     }
-}
-
-
-
