@@ -2,12 +2,13 @@ pipeline {
     agent any                        // or label('linux && node')
 
     environment {
-        // credentials configured in Jenkins → Credentials
-        GITHUB_TOKEN    = credentials('github-token')      // if you use gh-pages
-        HEROKU_API_KEY  = credentials('heroku-api-key')
-        HEROKU_APP_NAME = credentials('heroku-app-name')
-        // add others (e.g. MONGO_URI) via Jenkins config if you test against a real DB
-    }
+    GITHUB_TOKEN   = credentials('github-token')
+    HEROKU_API_KEY = credentials('heroku-api-key')
+    HEROKU_APP_NAME = 'hospital-management-system'
+}
+
+
+
 
     stages {
         stage('Checkout') {
