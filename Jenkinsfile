@@ -1,78 +1,41 @@
 pipeline {
-    agent any                        // or label('linux && node')
-
-    environment {
-    GITHUB_TOKEN   = credentials('github-token')
-    HEROKU_API_KEY = credentials('heroku-api-key')
-    HEROKU_APP_NAME = 'hospital-management-system'
-}
-
-
-
+    agent any
 
     stages {
         stage('Checkout') {
-            steps { checkout scm }
+            steps { 
+                checkout scm 
+            }
         }
 
-        stage('Backend: install & test') {
+        stage('Backend: install') {
             steps {
                 dir('Backend') {
                     sh 'npm ci'
-                    sh 'npm test || true'     // your repo has no tests yet
                 }
             }
         }
 
-        stage('Frontend: install & test & build') {
+        stage('Frontend: install & build') {
             steps {
                 dir('frontend') {
                     sh 'npm ci'
-                    sh 'npm test -- --coverage --watchAll=false || true'
                     sh 'npm run build'
-                }
-            }
-        }
-
-        stage('Deploy backend to Heroku') {
-            when { branch 'master' }
-            steps {
-                dir('Backend') {
-                    // assumes heroku CLI already installed on agent
-                    sh '''
-                      heroku git:remote -a "$HEROKU_APP_NAME"
-                      git push heroku HEAD:master
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy frontend to GitHub Pages') {
-            when { branch 'master' }
-            steps {
-                dir('frontend') {
-                    sh 'npm install -g gh-pages'
-                    sh 'npm run build'
-                    // the GITHUB_TOKEN is used automatically by gh-pages
-                    sh 'GITHUB_TOKEN=$GITHUB_TOKEN npx gh-pages -d build'
                 }
             }
         }
     }
-
-
 
     post {
-    always {
-        cleanWs()
-    }
-
-    success {
-        echo "Build successful: ${env.BUILD_URL}"
-    }
-
-    failure {
-        echo "Build failed: ${env.BUILD_URL}"
+        always {
+            cleanWs()
+        }
+        success {
+            echo "✅ Build successful!"
+        }
+        failure {
+            echo "❌ Build failed!"
+        }
     }
 }
 
