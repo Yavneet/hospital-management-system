@@ -38,7 +38,12 @@ A full-stack web application for managing hospital operations, including patient
    npm install
    cp .env.example .env  # Configure your environment variables
    npm run seed  # Optional: Seed the database
-   npm start
+   npm start          # development server
+   ```
+
+   For production mode (serves frontend build as well):
+   ```bash
+   npm run start:prod
    ```
 
 3. Frontend setup:
