@@ -86,13 +86,4 @@ pipeline {
             echo "❌ Pipeline failed!"
         }
     }
-} delete the 
-        // production 'build' folder needed to keep the app running.
-        success {
-            echo "✅ Build and Deployment successful!"
-        }
-        failure {
-            echo "❌ Build failed!"
-        }
-    }
 }
