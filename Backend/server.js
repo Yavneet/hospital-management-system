@@ -15,6 +15,11 @@ connectDB();
 
 app.get('/', (req, res) => res.send('Hospital Management Backend Running'));
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', message: 'Server is healthy' });
+});
+
 // Routes
 app.use('/api/patients', require('./routes/patientRoutes'));
 app.use('/api/doctors', require('./routes/doctorRoutes'));
@@ -25,8 +30,8 @@ app.use('/api/seed', require('./routes/seedRoutes'));
 app.use('/api/stats', require('./routes/statsRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 
-// If running in production mode, serve the React build files
-if (process.env.NODE_ENV === 'production') {
+// If running in production mode and not containerized, serve the React build files
+if (process.env.NODE_ENV === 'production' && !process.env.CONTAINERIZED) {
   const buildPath = path.join(__dirname, '../frontend/build');
   app.use(express.static(buildPath));
 

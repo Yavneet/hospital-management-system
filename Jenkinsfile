@@ -2,52 +2,91 @@ pipeline {
     agent any
 
     environment {
-        NODE_OPTIONS = '--max-old-space-size=4096'
-        // Defining ports based on your server.js and package.json defaults
-        BACKEND_PORT = '5000' 
+        REGISTRY = 'docker.io'
+        BACKEND_IMAGE = "${DOCKER_USERNAME}/hospital-backend"
+        FRONTEND_IMAGE = "${DOCKER_USERNAME}/hospital-frontend"
+        DOCKER_TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
     }
 
     stages {
         stage('Checkout') {
-            steps { 
-                checkout scm 
-            }
-        }
-
-        stage('Backend: Install') {
             steps {
-                dir('Backend') {
-                    bat 'npm ci'
-                }
+                checkout scm
             }
         }
 
-        stage('Frontend: Install & Build') {
-            steps {
-                dir('frontend') {
-                    bat 'npm ci'
-                    bat 'npm run build'
-                }
-            }
-        }
-
-        stage('Run Application') {
+        stage('Build Backend Image') {
             steps {
                 script {
-                    // Start the backend in production mode; it also serves the frontend build
-                    dir('Backend') {
-                        bat "start /B npm run start:prod"
-                    }
+                    bat "docker build -t ${env.BACKEND_IMAGE}:${env.DOCKER_TAG} -t ${env.BACKEND_IMAGE}:latest ./Backend"
+                }
+            }
+        }
 
-                    echo "🚀 Application is running!"
-                    echo "Backend/Frontend: http://localhost:${env.BACKEND_PORT}"
+        stage('Build Frontend Image') {
+            steps {
+                script {
+                    bat "docker build -t ${env.FRONTEND_IMAGE}:${env.DOCKER_TAG} -t ${env.FRONTEND_IMAGE}:latest ./frontend"
+                }
+            }
+        }
+
+        stage('Push Images') {
+            steps {
+                script {
+                    // Login to Docker Hub
+                    bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
+
+                    // Push backend images
+                    bat "docker push ${env.BACKEND_IMAGE}:${env.DOCKER_TAG}"
+                    bat "docker push ${env.BACKEND_IMAGE}:latest"
+
+                    // Push frontend images
+                    bat "docker push ${env.FRONTEND_IMAGE}:${env.DOCKER_TAG}"
+                    bat "docker push ${env.FRONTEND_IMAGE}:latest"
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                branch 'master'
+            }
+            steps {
+                script {
+                    echo "🚀 Deploying to production..."
+                    // Add your deployment commands here
+                    // For example: update docker-compose, trigger webhook, etc.
+                }
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                script {
+                    // Clean up local images
+                    bat "docker rmi ${env.BACKEND_IMAGE}:${env.DOCKER_TAG} || true"
+                    bat "docker rmi ${env.FRONTEND_IMAGE}:${env.DOCKER_TAG} || true"
                 }
             }
         }
     }
 
     post {
-        // Removed cleanWs() from 'always' because it would delete the 
+        always {
+            script {
+                // Clean up workspace
+                cleanWs()
+            }
+        }
+        success {
+            echo "✅ Pipeline completed successfully!"
+        }
+        failure {
+            echo "❌ Pipeline failed!"
+        }
+    }
+} delete the 
         // production 'build' folder needed to keep the app running.
         success {
             echo "✅ Build and Deployment successful!"
