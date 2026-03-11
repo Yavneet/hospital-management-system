@@ -142,26 +142,15 @@ All services include health checks for reliable deployments:
 ### GitHub Actions
 
 The GitHub Actions workflow:
-- Builds Docker images for backend and frontend
-- Pushes images to Docker Hub
-- Triggers on push/PR to `master` branch
-- Includes caching for faster builds
 
 **Required Secrets:**
-- `DOCKER_USERNAME`: Your Docker Hub username
-- `DOCKER_PASSWORD`: Your Docker Hub password
+
 
 ### Jenkins
 
 The Jenkins pipeline:
-- Builds Docker images locally
-- Pushes to Docker Hub
-- Includes cleanup steps
-- Windows-compatible with `bat` commands
 
 **Required Environment Variables:**
-- `DOCKER_USERNAME`: Your Docker Hub username
-- `DOCKER_PASSWORD`: Your Docker Hub password
 
 ## Deployment Strategies
 
