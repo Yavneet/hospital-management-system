@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        DOCKER_USERNAME = "avneetrao"
         BACKEND_IMAGE = "hospital-backend"
         FRONTEND_IMAGE = "hospital-frontend"
         DOCKER_TAG = "${env.BUILD_NUMBER}"
@@ -9,7 +10,7 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 checkout scm
             }
@@ -17,57 +18,56 @@ pipeline {
 
         stage('Build Backend Image') {
             steps {
-                script {
-                    bat "docker build -t %DOCKER_USERNAME%/${BACKEND_IMAGE}:${DOCKER_TAG} -t %DOCKER_USERNAME%/${BACKEND_IMAGE}:latest ./Backend"
-                }
+                bat "docker build -t %DOCKER_USERNAME%/%BACKEND_IMAGE%:%DOCKER_TAG% -t %DOCKER_USERNAME%/%BACKEND_IMAGE%:latest ./Backend"
             }
         }
 
         stage('Build Frontend Image') {
             steps {
-                script {
-                    bat "docker build -t %DOCKER_USERNAME%/${FRONTEND_IMAGE}:${DOCKER_TAG} -t %DOCKER_USERNAME%/${FRONTEND_IMAGE}:latest ./frontend"
+                bat "docker build -t %DOCKER_USERNAME%/%FRONTEND_IMAGE%:%DOCKER_TAG% -t %DOCKER_USERNAME%/%FRONTEND_IMAGE%:latest ./frontend"
+            }
+        }
+
+        stage('Docker Login & Push Images') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USERNAME',
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )]) {
+
+                    bat "echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin"
+
+                    bat "docker push %DOCKER_USERNAME%/%BACKEND_IMAGE%:%DOCKER_TAG%"
+                    bat "docker push %DOCKER_USERNAME%/%BACKEND_IMAGE%:latest"
+
+                    bat "docker push %DOCKER_USERNAME%/%FRONTEND_IMAGE%:%DOCKER_TAG%"
+                    bat "docker push %DOCKER_USERNAME%/%FRONTEND_IMAGE%:latest"
                 }
             }
         }
 
-        stage('Docker Login & Push') {
+        stage('Deploy Containers') {
             steps {
-                script {
-                    withCredentials([usernamePassword(
-                        credentialsId: 'dockerhub-creds',
-                        usernameVariable: 'DOCKER_USERNAME',
-                        passwordVariable: 'DOCKER_PASSWORD'
-                    )]) {
-
-                        bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
-
-                        bat "docker push %DOCKER_USERNAME%/${BACKEND_IMAGE}:${DOCKER_TAG}"
-                        bat "docker push %DOCKER_USERNAME%/${BACKEND_IMAGE}:latest"
-
-                        bat "docker push %DOCKER_USERNAME%/${FRONTEND_IMAGE}:${DOCKER_TAG}"
-                        bat "docker push %DOCKER_USERNAME%/${FRONTEND_IMAGE}:latest"
-                    }
-                }
+                bat "docker compose pull"
+                bat "docker compose up -d"
             }
         }
 
-        stage('Cleanup') {
+        stage('Cleanup Images') {
             steps {
-                script {
-                    bat "docker rmi %DOCKER_USERNAME%/${BACKEND_IMAGE}:${DOCKER_TAG} || exit 0"
-                    bat "docker rmi %DOCKER_USERNAME%/${FRONTEND_IMAGE}:${DOCKER_TAG} || exit 0"
-                }
+                bat "docker rmi %DOCKER_USERNAME%/%BACKEND_IMAGE%:%DOCKER_TAG% || exit 0"
+                bat "docker rmi %DOCKER_USERNAME%/%FRONTEND_IMAGE%:%DOCKER_TAG% || exit 0"
             }
         }
     }
 
     post {
         success {
-            echo "✅ Build and push successful!"
+            echo "Build, Push and Deployment Successful!"
         }
         failure {
-            echo "❌ Pipeline failed!"
+            echo "Pipeline Failed!"
         }
         always {
             cleanWs()
