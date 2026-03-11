@@ -3,14 +3,11 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 env:
   REGISTRY: docker.io
   BACKEND_IMAGE: avneetrao/hospital-backend
   FRONTEND_IMAGE: avneetrao/hospital-frontend
-
 
 jobs:
 
@@ -18,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
@@ -27,7 +24,7 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and Push Backend Image
@@ -37,13 +34,13 @@ jobs:
           push: true
           tags: |
             ${{ env.BACKEND_IMAGE }}:latest
-            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
 
   frontend:
     runs-on: ubuntu-latest
+    needs: backend
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
@@ -52,7 +49,7 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and Push Frontend Image
@@ -62,20 +59,3 @@ jobs:
           push: true
           tags: |
             ${{ env.FRONTEND_IMAGE }}:latest
-            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-
-  deploy:
-    needs: [backend, frontend]
-    runs-on: ubuntu-latest
-
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy Step
-        run: |
-          echo "Backend Image: ${{ env.BACKEND_IMAGE }}:latest"
-          echo "Frontend Image: ${{ env.FRONTEND_IMAGE }}:latest"
-          echo "Add your deployment script here"
