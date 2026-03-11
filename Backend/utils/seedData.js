@@ -25,13 +25,14 @@ async function seedData() {
     age: 18 + (i % 60),
     gender: i % 2 === 0 ? 'Male' : 'Female',
     diseaseHistory: i % 3 === 0 ? ['diabetes'] : [],
+    email: `patient${i + 1}@example.com`,
   }));
 
   const doctors = [
-    { name: 'Dr. Rajesh Khanna', specialization: 'Cardiology', available: true },
-    { name: 'Dr. Meera Menon', specialization: 'Neurology', available: true },
-    { name: 'Dr. Rakesh Reddy', specialization: 'Pediatrics', available: false },
-    { name: 'Dr. Suman Rao', specialization: 'Orthopedics', available: true },
+    { name: 'Dr. Rajesh Khanna', specialization: 'Cardiology', available: true, email: 'rajesh.khanna@example.com' },
+    { name: 'Dr. Meera Menon', specialization: 'Neurology', available: true, email: 'meera.menon@example.com' },
+    { name: 'Dr. Rakesh Reddy', specialization: 'Pediatrics', available: false, email: 'rakesh.reddy@example.com' },
+    { name: 'Dr. Suman Rao', specialization: 'Orthopedics', available: true, email: 'suman.rao@example.com' },
   ];
 
   const medicines = Array.from({ length: 6 }).map((_, i) => ({

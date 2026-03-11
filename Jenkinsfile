@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = 'docker.io'
-        BACKEND_IMAGE = "${DOCKER_USERNAME}/hospital-backend"
-        FRONTEND_IMAGE = "${DOCKER_USERNAME}/hospital-frontend"
-        DOCKER_TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+        BACKEND_IMAGE = "hospital-backend"
+        FRONTEND_IMAGE = "hospital-frontend"
+        DOCKER_TAG = "${env.BUILD_NUMBER}"
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -18,7 +18,7 @@ pipeline {
         stage('Build Backend Image') {
             steps {
                 script {
-                    bat "docker build -t ${env.BACKEND_IMAGE}:${env.DOCKER_TAG} -t ${env.BACKEND_IMAGE}:latest ./Backend"
+                    bat "docker build -t %DOCKER_USERNAME%/${BACKEND_IMAGE}:${DOCKER_TAG} -t %DOCKER_USERNAME%/${BACKEND_IMAGE}:latest ./Backend"
                 }
             }
         }
@@ -26,37 +26,28 @@ pipeline {
         stage('Build Frontend Image') {
             steps {
                 script {
-                    bat "docker build -t ${env.FRONTEND_IMAGE}:${env.DOCKER_TAG} -t ${env.FRONTEND_IMAGE}:latest ./frontend"
+                    bat "docker build -t %DOCKER_USERNAME%/${FRONTEND_IMAGE}:${DOCKER_TAG} -t %DOCKER_USERNAME%/${FRONTEND_IMAGE}:latest ./frontend"
                 }
             }
         }
 
-        stage('Push Images') {
+        stage('Docker Login & Push') {
             steps {
                 script {
-                    // Login to Docker Hub
-                    bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )]) {
 
-                    // Push backend images
-                    bat "docker push ${env.BACKEND_IMAGE}:${env.DOCKER_TAG}"
-                    bat "docker push ${env.BACKEND_IMAGE}:latest"
+                        bat "docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%"
 
-                    // Push frontend images
-                    bat "docker push ${env.FRONTEND_IMAGE}:${env.DOCKER_TAG}"
-                    bat "docker push ${env.FRONTEND_IMAGE}:latest"
-                }
-            }
-        }
+                        bat "docker push %DOCKER_USERNAME%/${BACKEND_IMAGE}:${DOCKER_TAG}"
+                        bat "docker push %DOCKER_USERNAME%/${BACKEND_IMAGE}:latest"
 
-        stage('Deploy') {
-            when {
-                branch 'master'
-            }
-            steps {
-                script {
-                    echo "🚀 Deploying to production..."
-                    // Add your deployment commands here
-                    // For example: update docker-compose, trigger webhook, etc.
+                        bat "docker push %DOCKER_USERNAME%/${FRONTEND_IMAGE}:${DOCKER_TAG}"
+                        bat "docker push %DOCKER_USERNAME%/${FRONTEND_IMAGE}:latest"
+                    }
                 }
             }
         }
@@ -64,26 +55,22 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
-                    // Clean up local images
-                    bat "docker rmi ${env.BACKEND_IMAGE}:${env.DOCKER_TAG} || true"
-                    bat "docker rmi ${env.FRONTEND_IMAGE}:${env.DOCKER_TAG} || true"
+                    bat "docker rmi %DOCKER_USERNAME%/${BACKEND_IMAGE}:${DOCKER_TAG} || exit 0"
+                    bat "docker rmi %DOCKER_USERNAME%/${FRONTEND_IMAGE}:${DOCKER_TAG} || exit 0"
                 }
             }
         }
     }
 
     post {
-        always {
-            script {
-                // Clean up workspace
-                cleanWs()
-            }
-        }
         success {
-            echo "✅ Pipeline completed successfully!"
+            echo "✅ Build and push successful!"
         }
         failure {
             echo "❌ Pipeline failed!"
+        }
+        always {
+            cleanWs()
         }
     }
 }
