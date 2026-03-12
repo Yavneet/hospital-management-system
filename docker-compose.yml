@@ -2,7 +2,6 @@ services:
 
   mongodb:
     image: mongo:7-jammy
-    container_name: hospital-mongo
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
@@ -17,7 +16,6 @@ services:
 
   backend:
     image: avneetrao/hospital-backend:latest
-    container_name: hospital-backend
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -38,7 +36,6 @@ services:
 
   frontend:
     image: avneetrao/hospital-frontend:latest
-    container_name: hospital-frontend
     restart: unless-stopped
     ports:
       - "3000:80"
